@@ -1,0 +1,81 @@
+# Nube De-Ess
+
+De-esser para REAPER (JSFX, macOS/Windows/Linux), hermano de [Nube EQ](../NubeEQ), [Nube Comp](../NubeComp),
+[Nube Verb](../NubeVerb), [Nube Limit](../NubeLimit) y [Nube Delay](../NubeDelay).
+
+![Nube De-Ess](docs/captura.png)
+
+- **Detección relativa** (por defecto): compara la zona de las s con la zona de la voz (~2 kHz). Funciona igual si la
+  voz entra a −10 o a −30 dBFS (probado con la misma voz a 0 y −20 dB: baja las s lo mismo). Ignora lo que está 30 dB
+  bajo lo más fuerte de los últimos segundos (ruido de fondo entre palabras). También **Absoluta** (por nivel).
+- **3 modos**:
+  - **Partida**: baja todo lo que está sobre *Desde* cuando aparece una s (el clásico).
+  - **Banda**: baja solo entre *Desde* y *Hasta* (s con silbido angosto; el aire de arriba queda intacto).
+  - **Ancha**: baja la señal entera en cada s.
+- Filtros Linkwitz-Riley de 4º orden con la fase alineada: sin reducción, la respuesta es **plana ±0.00 dB** en los
+  tres modos.
+- Umbral, **rango** (máximo que baja), ratio, ataque, release, **lookahead** hasta 5 ms (REAPER compensa la latencia),
+  enlace estéreo, salida.
+- **Canales**: estéreo, Mid/Side, solo centro (voz en un master) o solo lados.
+- **Escuchar s** (lo que mira el detector) y **escuchar cambios** (solo lo que se quita).
+- Gráficas: historial (voz, cuánto sobresalen las s, reducción) y **espectro en vivo** de entrada/salida con la curva
+  de reducción actual y máxima; las líneas *Desde* / *Hasta* se arrastran.
+- Ayuda en el pie de la ventana de todo lo que tienes bajo el mouse.
+- CPU: ~1.9 % de un núcleo por instancia en el peor caso (Banda + M/S + lookahead).
+
+## Instalar
+
+```sh
+./install.sh
+```
+
+Crea un enlace en `~/Library/Application Support/REAPER/Effects/Nube De-Ess/`. En REAPER aparece como
+**JS: Nube De-Ess**. Si cambias el código, vuelve a insertar el FX.
+
+## Cómo se usa
+
+| Acción | Cómo |
+|---|---|
+| Umbral | Perilla, o **arrastra arriba/abajo en el historial** (la línea punteada) |
+| Desde / Hasta | Perillas, o **arrastra las líneas** en el panel de frecuencias; doble clic = valor por defecto |
+| Rango / ratio | En el panel de frecuencias: **arriba/abajo = rango**, **rueda = ratio** |
+| Perillas | Arrastra arriba/abajo o usa la rueda; **Shift** = fino; **doble clic** = valor por defecto |
+| Presets | Botón *Presets* o clic derecho en las gráficas |
+
+Para ajustar: pon **Escuchar s** y mueve *Desde* hasta que se oigan las s y casi nada de la voz; después
+**Escuchar cambios** y baja el umbral hasta que se oigan "sss" sueltas (si se oye la voz entera, te pasaste).
+
+## Presets
+
+| Preset | Qué hace |
+|---|---|
+| Voz - suave | Partida 5.5 kHz, −7 dB, rango 6, 3:1 |
+| Voz - normal | Partida 5 kHz, −10 dB, rango 10, 4:1 |
+| Voz - fuerte | Partida 4.5 kHz, −15 dB, rango 15, 6:1 |
+| Voz Tonor - De-esser (Nube baja) | Los valores de `claude_deesser_lr` de la mezcla (5.5 kHz, −10, 4:1, máx 10) |
+| Voz aguda / femenina | Partida 7 kHz |
+| Silbido 4-6 kHz (s raras) | Banda 4–6 kHz, −9 dB, rango 8 (las s con casi toda la energía en 4–5 kHz) |
+| Antes de la reverb (envío) | Partida 4 kHz, −14 dB, rango 14, 8:1 (s que no salpiquen la reverb) |
+| Hi-hats / platillos | Banda 6–12 kHz, absoluta −24 dB, rango 6 |
+| Master (suave, solo centro) | Solo Mid, −6 dB, rango 3, 2:1, lookahead 2 ms |
+| Por defecto | |
+
+## Pruebas
+
+- `tests/run.sh`: renderiza 38 casos en una pestaña temporal de REAPER y los compara con la teoría (45 chequeos):
+  respuesta plana sin reducción en los 3 modos, curva relativa y absoluta (±0.2 dB contra la fórmula del LR4 con la
+  deformación bilineal), independencia del nivel, modo Banda (lo de arriba no se toca), Ancha, escuchar s / cambios,
+  solo Mid / Side, enlace, ataque y release, lookahead (y latencia compensada), y con la voz seca: s −7.7 dB de
+  mediana, vocales 0.00 dB, igual a −20 dB, y los 10 presets.
+- `tests/ui_test.py` (+ `ui.py`, `ui_dump.lua`, `scroll.swift`, `reopen.sh`): 15 pruebas de la interfaz con el mouse
+  (`cliclick`). `tests/reopen.sh` abre la demo con la voz; `tests/ui_close.lua` la cierra.
+- `tests/perf.lua`: CPU.
+
+## Detalles técnicos
+
+- Por canal: split LR4 en *Desde* (SVF de Simper en cascada: graves + agudos = pasa-todo de 2º orden); con *Hasta*, la
+  parte alta se divide otra vez y los graves pasan por el mismo pasa-todo para que todo sume plano.
+- Detector: energía de la zona (1.5 ms) contra la de un pasa-banda en *Desde*/2.75 (Q 0.7), rodilla de 4 dB, ataque y
+  release en dB. Absoluta: nivel de la zona (equivalente a pico de seno).
+- Trampas de EEL2 (las mismas de los otros Nube): variables sin distinción de mayúsculas, nada de notación científica,
+  funciones definidas antes de usarse, y la interfaz pide recalcular con `upd = 1`.

@@ -1,0 +1,20 @@
+-- Abre una pestaña de demo: pista con la voz seca (fader en -inf, no suena), Nube De-Ess con un preset,
+-- ventana del FX flotante y reproducción en loop para ver las gráficas. Cerrar con tests/ui_close.lua.
+local ROOT = os.getenv("HOME") .. "/Music/NubeDeEss/tests"
+local AUDIO = os.getenv("NUBE_AUDIO") or (ROOT .. "/signals/voz.wav")
+reaper.Main_OnCommand(40859, 0)
+reaper.InsertTrackAtIndex(0, false); local tr = reaper.GetTrack(0, 0)
+reaper.GetSetMediaTrackInfo_String(tr, "P_NAME", "Nube De-Ess demo", true)
+reaper.SetMediaTrackInfo_Value(tr, "D_VOL", 0)
+local item = reaper.AddMediaItemToTrack(tr); local take = reaper.AddTakeToMediaItem(item)
+local src = reaper.PCM_Source_CreateFromFile(AUDIO); reaper.SetMediaItemTake_Source(take, src)
+reaper.SetMediaItemInfo_Value(item, "D_LENGTH", reaper.GetMediaSourceLength(src))
+reaper.UpdateArrange()
+local fx = reaper.TrackFX_AddByName(tr, "JS:Nube De-Ess/nube_deess.jsfx", false, -1)
+reaper.TrackFX_SetParam(tr, fx, 14, tonumber(os.getenv("NUBE_PRESET") or "2"))
+reaper.TrackFX_Show(tr, fx, 3)
+reaper.GetSet_LoopTimeRange(true, true, 0, reaper.GetMediaSourceLength(src), false)
+reaper.SetEditCurPos(0, false, false)
+reaper.GetSetRepeat(1)
+reaper.OnPlayButton()
+local f = io.open(ROOT .. "/out/ui.txt", "w"); f:write("done\n"); f:close()
