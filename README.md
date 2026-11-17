@@ -1,7 +1,28 @@
+<!-- en -->
 # Nube De-Ess
 
-De-esser para REAPER (JSFX, macOS/Windows/Linux), hermano de [Nube EQ](../NubeEQ), [Nube Comp](../NubeComp),
-[Nube Verb](../NubeVerb), [Nube Limit](../NubeLimit) y [Nube Delay](../NubeDelay).
+A free de-esser for [REAPER](https://www.reaper.fm), written as a JSFX (macOS / Windows / Linux), part of the
+[Nube plugins](https://github.com/KevinMeneses/nube-plugins).
+
+![Nube De-Ess](docs/captura.png)
+
+Relative detection (ignores the noise floor between words) or absolute, split-band / band / wideband modes with phase-aligned crossovers, range, ratio, lookahead, M/S, listen to the esses or to what is removed, live spectrum and 10 presets. ~1.9 % CPU.
+
+**Install** — with [ReaPack](https://reapack.com): *Extensions → ReaPack → Import repositories*, paste
+`https://github.com/KevinMeneses/nube-plugins/raw/main/index.xml`, then install **Nube De-Ess**. Or copy `nube_deess.jsfx`
+into `REAPER/Effects/Nube De-Ess/` (on macOS `./install.sh` links it). It shows up as **JS: Nube De-Ess**. The interface is in Spanish.
+
+**How it was made** — designed and built with [Claude Code](https://claude.com/claude-code). Since an AI can't
+listen, every feature is verified by rendering test cases inside REAPER and comparing them with the theory
+(`tests/run.sh`), plus mouse-driven UI tests (`tests/ui_test.py`).
+
+**License** — GPL-3.0-or-later (see `LICENSE`).
+
+---
+
+## Español
+De-esser para REAPER (JSFX, macOS/Windows/Linux), hermano de [Nube EQ](https://github.com/KevinMeneses/nube-eq), [Nube Comp](https://github.com/KevinMeneses/nube-comp),
+[Nube Verb](https://github.com/KevinMeneses/nube-verb), [Nube Limit](https://github.com/KevinMeneses/nube-limit) y [Nube Delay](https://github.com/KevinMeneses/nube-delay).
 
 ![Nube De-Ess](docs/captura.png)
 
@@ -79,3 +100,5 @@ Para ajustar: pon **Escuchar s** y mueve *Desde* hasta que se oigan las s y casi
   release en dB. Absoluta: nivel de la zona (equivalente a pico de seno).
 - Trampas de EEL2 (las mismas de los otros Nube): variables sin distinción de mayúsculas, nada de notación científica,
   funciones definidas antes de usarse, y la interfaz pide recalcular con `upd = 1`.
+
+Nota sobre las pruebas: necesitan REAPER y Python con numpy, scipy y soundfile (`NUBE_PY=/ruta/a/python tests/run.sh`). Los casos con voz o música real usan grabaciones propias que no están en el repo (`tests/signals/`); sin ellas esos casos no se pueden correr.

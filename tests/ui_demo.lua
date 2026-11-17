@@ -1,6 +1,6 @@
 -- Abre una pestaña de demo: pista con la voz seca (fader en -inf, no suena), Nube De-Ess con un preset,
 -- ventana del FX flotante y reproducción en loop para ver las gráficas. Cerrar con tests/ui_close.lua.
-local ROOT = os.getenv("HOME") .. "/Music/NubeDeEss/tests"
+local ROOT = debug.getinfo(1, "S").source:match("^@(.*)/[^/]*$")
 local AUDIO = os.getenv("NUBE_AUDIO") or (ROOT .. "/signals/voz.wav")
 reaper.Main_OnCommand(40859, 0)
 reaper.InsertTrackAtIndex(0, false); local tr = reaper.GetTrack(0, 0)

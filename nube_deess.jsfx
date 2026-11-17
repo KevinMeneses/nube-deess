@@ -1,6 +1,7 @@
 desc:Nube De-Ess - de-esser (deteccion relativa, banda partida / banda / ancha, M/S, lookahead)
 //tags: de-esser deesser sibilance dynamics vocal mid-side lookahead
-//author: Kev Meneses + Claude
+//author: Kev Meneses + Claude (Claude Code)
+//license: GPL-3.0-or-later
 //version: 1.0.0
 
 slider1:-10<-50,10,0.1>-Umbral (dB)
