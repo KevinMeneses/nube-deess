@@ -50,7 +50,7 @@ local CASES = {
   {"voz_m20",       "voz.wav",     {[15] = 2}, 2, -20},
   {"voz_m20_seca",  "voz.wav",     {[2] = 0}, 2, -20},
 }
-for p = 1, 10 do CASES[#CASES + 1] = {"preset" .. p, "voz.wav", {[PRESET] = p}} end
+for p = 1, 19 do CASES[#CASES + 1] = {"preset" .. p, "voz.wav", {[PRESET] = p}} end
 
 reaper.Main_OnCommand(40859, 0) -- nueva pestaña
 reaper.GetSetProjectInfo(0, "PROJECT_SRATE", 48000, true)

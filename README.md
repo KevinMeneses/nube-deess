@@ -6,7 +6,7 @@ A free de-esser for [REAPER](https://www.reaper.fm), written as a JSFX (macOS / 
 
 ![Nube De-Ess](docs/captura.png)
 
-Relative detection (ignores the noise floor between words) or absolute, split-band / band / wideband modes with phase-aligned crossovers, range, ratio, lookahead, M/S, listen to the esses or to what is removed, live spectrum and 10 presets. ~1.9 % CPU.
+Relative detection (ignores the noise floor between words) or absolute, split-band / band / wideband modes with phase-aligned crossovers, range, ratio, lookahead, M/S, listen to the esses or to what is removed, live spectrum and 19 presets. ~1.9 % CPU.
 
 **Install** — with [ReaPack](https://reapack.com): *Extensions → ReaPack → Import repositories*, paste
 `https://github.com/KevinMeneses/nube-plugins/raw/main/index.xml`, then install **Nube De-Ess**. Or copy `nube_deess.jsfx`
@@ -87,7 +87,7 @@ Para ajustar: pon **Escuchar s** y mueve *Desde* hasta que se oigan las s y casi
   respuesta plana sin reducción en los 3 modos, curva relativa y absoluta (±0.2 dB contra la fórmula del LR4 con la
   deformación bilineal), independencia del nivel, modo Banda (lo de arriba no se toca), Ancha, escuchar s / cambios,
   solo Mid / Side, enlace, ataque y release, lookahead (y latencia compensada), y con la voz seca: s −7.7 dB de
-  mediana, vocales 0.00 dB, igual a −20 dB, y los 10 presets.
+  mediana, vocales 0.00 dB, igual a −20 dB, y los 19 presets.
 - `tests/ui_test.py` (+ `ui.py`, `ui_dump.lua`, `scroll.swift`, `reopen.sh`): 15 pruebas de la interfaz con el mouse
   (`cliclick`). `tests/reopen.sh` abre la demo con la voz; `tests/ui_close.lua` la cierra.
 - `tests/perf.lua`: CPU.
