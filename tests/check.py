@@ -114,9 +114,10 @@ inrange("voz: vocales intactas (graves)", rv_lo, 0, 0.1)
 inrange("voz: vocales casi intactas (agudos)", rv_hi, 0, 1.0)
 n2, rs2, _, _ = voz_stats("voz_m20", "voz_m20_seca")
 scalar("voz -20 dB: las s bajan igual", rs2, rs, 1.0)
-for p in range(1, 11):
-    _, r, rlo, _ = voz_stats(f"preset{p}", "voz_seca", sg.butter(4, [4000, 6000], "band", fs=SR, output="sos") if p == 6 else HI)
-    if p == 8: inrange(f"preset {p} (hi-hats): no rompe la voz", rlo, 0, 0.5)
+for p in range(1, 20):
+    zona = {6: [4000, 6000], 14: [5000, 10000], 16: [3000, 8000]}.get(p)   # presets de banda: se mide en su zona
+    _, r, rlo, _ = voz_stats(f"preset{p}", "voz_seca", sg.butter(4, zona, "band", fs=SR, output="sos") if zona else HI)
+    if p in (8, 17, 18): inrange(f"preset {p} (no es para voz): no rompe la voz", rlo, 0, 0.5)
     else: inrange(f"preset {p}: baja las s", r, 1, 18)
 print("\nFALLAS:", fails)
 sys.exit(1 if fails else 0)

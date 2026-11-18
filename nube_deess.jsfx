@@ -2,7 +2,7 @@ desc:Nube De-Ess - de-esser (deteccion relativa, banda partida / banda / ancha, 
 //tags: de-esser deesser sibilance dynamics vocal mid-side lookahead
 //author: Kev Meneses + Claude (Claude Code)
 //license: GPL-3.0-or-later
-//version: 1.0.0
+//version: 1.1.0
 
 slider1:-10<-50,10,0.1>-Umbral (dB)
 slider2:10<0,30,0.1>-Rango (dB)
@@ -18,7 +18,7 @@ slider11:0<0,2,1{Partida (todo lo de arriba),Banda (solo la zona),Ancha (toda la
 slider12:0<0,1,1{Relativa (no depende del volumen),Absoluta}>-Deteccion
 slider13:0<0,3,1{Estereo,Mid/Side,Solo centro (Mid),Solo lados (Side)}>-Canales
 slider14:0<0,2,1{Normal,Solo las s (detector),Solo lo que quita}>-Escuchar
-slider15:0<0,10,1{-,Voz - suave,Voz - normal,Voz - fuerte,Voz Tonor - De-esser (Nube baja),Voz aguda / femenina,Silbido 4-6 kHz (s raras),Antes de la reverb (envio),Hi-hats / platillos,Master (suave solo centro),Por defecto}>-Cargar preset
+slider15:0<0,19,1{-,Voz - suave,Voz - normal,Voz - fuerte,Voz Tonor - De-esser (Nube baja),Voz aguda / femenina,Silbido 4-6 kHz (s raras),Antes de la reverb (envio),Hi-hats / platillos,Master (suave solo centro),Voz rap rapida (s cortas),Voz con autotune (s duras),Voz grave / masculina,Coros / dobles (fuerte),Voz susurrada / ASMR,Voz hablada / podcast,Guitarra acustica (cuerdas brillantes),Platillos en el overhead (banda),Lados brillantes (solo Side),Por defecto}>-Cargar preset
 
 in_pin:Entrada L
 in_pin:Entrada R
@@ -153,7 +153,7 @@ update_params();
 a_og = outg_t;
 
 // ---------------------------------------------------------------- presets
-NPRESETS = 10;
+NPRESETS = 19;
 function preset_name(n)
 (
   n == 1 ? "Voz - suave" :
@@ -165,7 +165,16 @@ function preset_name(n)
   n == 7 ? "Antes de la reverb (envio)" :
   n == 8 ? "Hi-hats / platillos" :
   n == 9 ? "Master (suave, solo centro)" :
-  n == 10 ? "Por defecto" : "";
+  n == 10 ? "Voz rap rapida (s cortas)" :
+  n == 11 ? "Voz con autotune (s duras)" :
+  n == 12 ? "Voz grave / masculina" :
+  n == 13 ? "Coros / dobles (fuerte)" :
+  n == 14 ? "Voz susurrada / ASMR" :
+  n == 15 ? "Voz hablada / podcast" :
+  n == 16 ? "Guitarra acustica (cuerdas brillantes)" :
+  n == 17 ? "Platillos en el overhead (banda)" :
+  n == 18 ? "Lados brillantes (solo Side)" :
+  n == 19 ? "Por defecto" : "";
 );
 // pr(modo, umbral, rango, ratio, desde, hasta, ataque, release)
 function pr(md, t, r, ra, a, b, at, rl)
@@ -185,6 +194,15 @@ function load_preset(n)
   n == 7 ? pr(0, -14, 14, 8, 4000, 20000, 0.3, 60) :
   n == 8 ? ( pr(1, -24, 6, 3, 6000, 12000, 2, 80); sset(12, 1); ) :
   n == 9 ? ( pr(0, -6, 3, 2, 5500, 20000, 1, 60); sset(13, 2); sset(8, 2); );
+  n == 10 ? ( pr(0, -12, 12, 5, 5000, 20000, 0.3, 25); sset(8, 1); );
+  n == 11 ? ( pr(0, -13, 12, 6, 5500, 20000, 0.3, 35); );
+  n == 12 ? ( pr(0, -10, 10, 4, 4500, 20000, 0.5, 40); );
+  n == 13 ? ( pr(0, -16, 16, 8, 4500, 20000, 0.3, 50); );
+  n == 14 ? ( pr(1, -18, 8, 4, 5000, 10000, 1, 60); );
+  n == 15 ? ( pr(0, -8, 8, 3, 5000, 20000, 0.5, 50); sset(8, 2); );
+  n == 16 ? ( pr(1, -24, 6, 3, 3000, 8000, 2, 80); );
+  n == 17 ? ( pr(1, -20, 8, 4, 8000, 16000, 1, 60); );
+  n == 18 ? ( pr(0, -10, 6, 3, 6000, 20000, 1, 60); sset(13, 3); );
   upd = 1;
 );
 
