@@ -2,6 +2,9 @@
 -- ventana del FX flotante y reproducción en loop para ver las gráficas. Cerrar con tests/ui_close.lua.
 local ROOT = debug.getinfo(1, "S").source:match("^@(.*)/[^/]*$")
 local AUDIO = os.getenv("NUBE_AUDIO") or (ROOT .. "/signals/voz.wav")
+-- usa el .jsfx de ESTA copia del repo (enlazado en Effects/Nube De-Ess Test; ui_close.lua lo borra)
+local EFF = reaper.GetResourcePath() .. "/Effects/Nube De-Ess Test"
+os.execute('mkdir -p "' .. EFF .. '" && ln -sf "' .. ROOT:match("^(.*)/[^/]*$") .. '/nube_deess.jsfx" "' .. EFF .. '/nube_deess.jsfx"')
 reaper.Main_OnCommand(40859, 0)
 reaper.InsertTrackAtIndex(0, false); local tr = reaper.GetTrack(0, 0)
 reaper.GetSetMediaTrackInfo_String(tr, "P_NAME", "Nube De-Ess demo", true)
@@ -10,7 +13,7 @@ local item = reaper.AddMediaItemToTrack(tr); local take = reaper.AddTakeToMediaI
 local src = reaper.PCM_Source_CreateFromFile(AUDIO); reaper.SetMediaItemTake_Source(take, src)
 reaper.SetMediaItemInfo_Value(item, "D_LENGTH", reaper.GetMediaSourceLength(src))
 reaper.UpdateArrange()
-local fx = reaper.TrackFX_AddByName(tr, "JS:Nube De-Ess/nube_deess.jsfx", false, -1)
+local fx = reaper.TrackFX_AddByName(tr, "JS:Nube De-Ess Test/nube_deess.jsfx", false, -1)
 reaper.TrackFX_SetParam(tr, fx, 14, tonumber(os.getenv("NUBE_PRESET") or "2"))
 reaper.TrackFX_Show(tr, fx, 3)
 reaper.GetSet_LoopTimeRange(true, true, 0, reaper.GetMediaSourceLength(src), false)

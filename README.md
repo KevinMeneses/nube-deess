@@ -87,11 +87,11 @@ Para ajustar: pon **Escuchar s** y mueve *Desde* hasta que se oigan las s y casi
 | Master (suave, solo centro) | Solo Mid, −6 dB, rango 3, 2:1, lookahead 2 ms |
 | Voz rap rápida, autotune, grave, coros, susurrada, podcast, guitarra, overhead, lados | (ver el menú) |
 | Forma de las s (Nube baja) | Los valores de `claude_s_shaper` de la mezcla: 4.5 kHz, Q 1.5, umbral 2, cuánto 0.6, máx 6, detección −3 |
-| Forma de las s - suave | 4.5 kHz, umbral 8, cuánto 0.4, máx 4 |
+| Forma de las s - suave | 4.5 kHz, umbral 6, cuánto 0.3, máx 4, detección −6 |
 | Forma de las s - normal | = `claude_s_shaper` por defecto (4.5 kHz, Q 1, umbral 6, 0.6, máx 8, −12) |
 | Forma de las s - fuerte | 4.5 kHz, Q 1.2, umbral 3, cuánto 1, máx 12, −8 |
 | Forma - voz aguda | 5.2 kHz, Q 1.2, umbral 4, máx 8 |
-| Forma - voz grave | 3.8 kHz, umbral 5, máx 8 |
+| Forma - voz grave | 3.8 kHz, umbral 5, máx 8, detección −3 (más estricta: a 3.8 kHz las vocales contarían como s) |
 | Por defecto | (pasó del 19 al 25; los presets 1–18 tienen el mismo número y suenan igual que en la 1.1) |
 
 Sobre el modo Forma: en el `claude_s_shaper` original, `a0` de la campana y `A0` del detector de 4.5 kHz son la
@@ -111,7 +111,11 @@ Así sonó en Nube baja y así se reproduce, a propósito y probado muestra a mu
   deformación bilineal), independencia del nivel, modo Banda (lo de arriba no se toca), Ancha, escuchar s / cambios,
   solo Mid / Side, enlace, ataque y release, lookahead (y latencia compensada), y con la voz seca: s −7.7 dB de
   mediana, vocales 0.00 dB, igual a −20 dB, y los 19 presets.
-- `tests/ui_test.py` (+ `ui.py`, `ui_dump.lua`, `scroll.swift`, `reopen.sh`): 15 pruebas de la interfaz con el mouse
+- `tests/ui_test.py` (+ `ui.py`, `ui_dump.lua`, `scroll.swift`, `reopen.sh`): 28 pruebas de la interfaz con el mouse
+  (13 del modo Forma: botón, perillas propias, doble clic, línea de la campana, rueda, historial y menú de presets).
+  `reopen.sh` usa el `.jsfx` de esta copia del repo. Con los clics sintéticos de `cliclick` REAPER a veces no le
+  entrega al JSFX el último "soltar" (`mouse_cap` queda en 1); `ui.py` manda un soltar extra tras cada doble clic y
+  cada arrastre
   (`cliclick`). `tests/reopen.sh` abre la demo con la voz; `tests/ui_close.lua` la cierra.
 - `tests/perf.lua`: CPU.
 
