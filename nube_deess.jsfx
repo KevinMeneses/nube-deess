@@ -18,7 +18,7 @@ slider11:0<0,3,1{Partida (todo lo de arriba),Banda (solo la zona),Ancha (toda la
 slider12:0<0,1,1{Relativa (no depende del volumen),Absoluta}>-Deteccion
 slider13:0<0,3,1{Estereo,Mid/Side,Solo centro (Mid),Solo lados (Side)}>-Canales
 slider14:0<0,2,1{Normal,Solo las s (detector),Solo lo que quita}>-Escuchar
-slider15:0<0,25,1{-,Voz - suave,Voz - normal,Voz - fuerte,Voz Tonor - De-esser (Nube baja),Voz aguda / femenina,Silbido 4-6 kHz (s raras),Antes de la reverb (envio),Hi-hats / platillos,Master (suave solo centro),Voz rap rapida (s cortas),Voz con autotune (s duras),Voz grave / masculina,Coros / dobles (fuerte),Voz susurrada / ASMR,Voz hablada / podcast,Guitarra acustica (cuerdas brillantes),Platillos en el overhead (banda),Lados brillantes (solo Side),Forma de las s (Nube baja),Forma de las s - suave,Forma de las s - normal,Forma de las s - fuerte,Forma - voz aguda (s en 5-5.5 kHz),Forma - voz grave (s en 3.5-4 kHz),Por defecto}>-Cargar preset
+slider15:0<0,26,1{-,Voz - suave,Voz - normal,Voz - fuerte,Voz Tonor - De-esser (Nube baja),Voz aguda / femenina,Silbido 4-6 kHz (s raras),Antes de la reverb (envio),Hi-hats / platillos,Master (suave solo centro),Voz rap rapida (s cortas),Voz con autotune (s duras),Voz grave / masculina,Coros / dobles (fuerte),Voz susurrada / ASMR,Voz hablada / podcast,Guitarra acustica (cuerdas brillantes),Platillos en el overhead (banda),Lados brillantes (solo Side),Forma de las s (Nube baja),Forma de las s - suave,Forma de las s - normal,Forma de las s - fuerte,Forma - voz aguda (s en 5-5.5 kHz),Forma - voz grave (s en 3.5-4 kHz),Forma - s agudas 7 kHz (Nube baja),Por defecto}>-Cargar preset
 slider16:4500<2000,12000,1>-Forma: frecuencia de la campana (Hz)
 slider17:1<0.5,3,0.01>-Forma: Q
 slider18:6<0,20,0.1>-Forma: umbral (dB de la campana sobre 7-9 kHz)
@@ -192,7 +192,7 @@ update_params();
 a_og = outg_t;
 
 // ---------------------------------------------------------------- presets
-NPRESETS = 25;
+NPRESETS = 26;
 function preset_name(n)
 (
   n == 1 ? "Voz - suave" :
@@ -219,7 +219,8 @@ function preset_name(n)
   n == 22 ? "Forma de las s - fuerte" :
   n == 23 ? "Forma - voz aguda (s en 5-5.5 kHz)" :
   n == 24 ? "Forma - voz grave (s en 3.5-4 kHz)" :
-  n == 25 ? "Por defecto" : "";
+  n == 25 ? "Forma - s agudas 7 kHz (Nube baja)" :
+  n == 26 ? "Por defecto" : "";
 );
 // pr(modo, umbral, rango, ratio, desde, hasta, ataque, release)
 function pr(md, t, r, ra, a, b, at, rl)
@@ -259,6 +260,7 @@ function load_preset(n)
   n == 21 ? pf(4500, 1, 6, 0.6, 8, -12);         // = claude_s_shaper por defecto
   n == 22 ? pf(4500, 1.2, 3, 1, 12, -8);
   n == 23 ? pf(5200, 1.2, 4, 0.7, 8, -10);
+  n == 25 ? pf(7073, 2.81, 7, 0.55, 18, 3.4);   // el segundo Forma de la mezcla: las s silbadas en ~7 kHz que nada atrapaba
   n == 24 ? pf(3800, 1, 5, 0.6, 8, -3);         // deteccion estricta: a 3.8 kHz las vocales cuentan como s
   upd = 1;
 );

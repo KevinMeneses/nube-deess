@@ -76,6 +76,7 @@ local more = {
   {"fo_45_q2",    "s45_m12.wav", with(F, {[17] = 2})},
   {"fo_38",       "s38_m12.wav", with(F, {[16] = 3800})},
   {"fo_8k",       "s8k_m6.wav",  with(F, {[16] = 8000})},
+  {"fo_p25_7k",   "s7k_m12.wav", {[PRESET] = 25}},
   {"fo_8k_off",   "s8k_m6.wav",  F},
   {"fo_1k",       "s1k_m6.wav",  F},
   {"fo_ruido",    "noise.wav",   F},
@@ -101,7 +102,7 @@ local more = {
   {"old_msla_nd",  "voz.wav", {[11] = 1, [5] = 10000, [13] = 1, [8] = 2, [9] = 50}},
 }
 for _, c in ipairs(more) do CASES[#CASES + 1] = c end
-for p = 1, 25 do CASES[#CASES + 1] = {"preset" .. p, "voz.wav", {[PRESET] = p}} end
+for p = 1, 26 do CASES[#CASES + 1] = {"preset" .. p, "voz.wav", {[PRESET] = p}} end
 for p = 1, 19 do CASES[#CASES + 1] = {"ref_preset" .. p, "voz.wav", {[PRESET] = p}, 2, 0, REF} end
 
 reaper.Main_OnCommand(40859, 0) -- nueva pestaña

@@ -23,6 +23,7 @@ b = np.zeros(n); i0 = SR; b[i0:] = a(-6) * np.cos(2 * np.pi * 8000 * (t[i0:] - 1
 # modo Forma de las s: "s silbada" (seno en la campana), "s pareja" (ruido blanco) y rafaga para el lookahead
 save("s45_m12.wav", s(4500, -12), s(4500, -12))
 save("s38_m12.wav", s(3800, -12), s(3800, -12))
+save("s7k_m12.wav", s(7073, -12), s(7073, -12))
 save("s45_lr.wav", s(4500, -12), s(4500, -30))
 nz = np.random.default_rng(7).standard_normal(n) * a(-20); save("noise.wav", nz, nz)
 b = np.zeros(n); b[i0:] = a(-12) * np.cos(2 * np.pi * 4500 * (t[i0:] - 1.0)); save("burst45.wav", b, b)

@@ -6,7 +6,7 @@ A free de-esser for [REAPER](https://www.reaper.fm), written as a JSFX (macOS / 
 
 ![Nube De-Ess](docs/captura.png)
 
-Relative detection (ignores the noise floor between words) or absolute, split-band / band / wideband modes with phase-aligned crossovers, a "sibilant shape" mode that only tames narrow, whistly esses (dynamic bell at 4–5 kHz), range, ratio, lookahead, M/S, listen to the esses or to what is removed, live spectrum and 25 presets. ~1.9 % CPU.
+Relative detection (ignores the noise floor between words) or absolute, split-band / band / wideband modes with phase-aligned crossovers, a "sibilant shape" mode that only tames narrow, whistly esses (dynamic bell at 4–5 kHz), range, ratio, lookahead, M/S, listen to the esses or to what is removed, live spectrum and 26 presets. ~1.9 % CPU.
 
 **Install** — with [ReaPack](https://reapack.com): *Extensions → ReaPack → Import repositories*, paste
 `https://github.com/KevinMeneses/nube-plugins/raw/main/index.xml`, then install **Nube De-Ess**. Or copy `nube_deess.jsfx`
@@ -92,7 +92,8 @@ Para ajustar: pon **Escuchar s** y mueve *Desde* hasta que se oigan las s y casi
 | Forma de las s - fuerte | 4.5 kHz, Q 1.2, umbral 3, cuánto 1, máx 12, −8 |
 | Forma - voz aguda | 5.2 kHz, Q 1.2, umbral 4, máx 8 |
 | Forma - voz grave | 3.8 kHz, umbral 5, máx 8, detección −3 (más estricta: a 3.8 kHz las vocales contarían como s) |
-| Por defecto | (pasó del 19 al 25; los presets 1–18 tienen el mismo número y suenan igual que en la 1.1) |
+| Forma - s agudas 7 kHz (Nube baja) | El segundo Forma de la mezcla: 7073 Hz, Q 2.81, umbral 7, cuánto 0.55, máx 18, detección +3.4. Atrapó las pocas s silbadas en ~7 kHz que nada más agarraba |
+| Por defecto | (pasó del 19 al 26; los presets 1–18 tienen el mismo número y suenan igual que en la 1.1) |
 
 Sobre el modo Forma: en el `claude_s_shaper` original, `a0` de la campana y `A0` del detector de 4.5 kHz son la
 misma variable (EEL no distingue mayúsculas). Mientras corta, el detector queda ~20 dB más sensible hasta el bloque

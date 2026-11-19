@@ -123,7 +123,7 @@ for p in range(1, 19):
 print("== presets y ajustes de la 1.1.0 suenan igual en la 1.2.0")
 def null(a, b): return db(np.abs(load(a) - load(b)).max())
 for p in range(1, 20):
-    q = 25 if p == 19 else p                       # "Por defecto" paso del 19 al 25
+    q = 26 if p == 19 else p                       # "Por defecto" paso del 19 al 26
     inrange(f"preset {p} = 1.1.0 (dB de diferencia)", null(f"preset{q}", f"ref_preset{p}"), -999, -140)
 inrange("ajustes de Nube baja = 1.1.0", null("old_proj_nd", "old_proj_ref"), -999, -140)
 inrange("banda + M/S + lookahead = 1.1.0", null("old_msla_nd", "old_msla_ref"), -999, -140)
@@ -199,11 +199,16 @@ inrange("forma voz: las s bajan en 4-5.5 kHz", rs, 0.3, 8)
 inrange("forma voz: vocales intactas (graves)", rv_lo, 0, 0.05)
 _, rs2, _, _ = voz_stats("fo_voz_m20", "voz_m20_seca", HS)
 scalar("forma voz -20 dB: bajan igual", rs2, rs, 0.5)
-for p in range(19, 25):
-    zona = [3200, 4500] if p == 24 else [4000, 5500]          # se mide en la zona de cada campana
+for p in range(19, 26):
+    zona = {24: [3200, 4500], 25: [6000, 8500]}.get(p, [4000, 5500])   # se mide en la zona de cada campana
     _, r, rlo, rhi = voz_stats(f"preset{p}", "voz_seca", sg.butter(4, zona, "band", fs=SR, output="sos"))
     print(f"    preset {p}: en la zona, s {r:.2f} dB / vocales {rhi:.2f} dB")
-    inrange(f"preset {p} (forma): baja las s", r, 1, 12)
+    if p == 25:   # solo para pocas s muy silbadas en ~7 kHz (la voz de prueba no las tiene): se prueba con un seno
+        c7 = forma_cut(7073, f0=7073, q=2.81, thr=7, amt=0.55, mx=18, det=3.4)
+        print(f"    preset 25: teoria baja {c7:.2f} dB un seno de 7 kHz")
+        scalar("preset 25 (forma): s silbada en 7 kHz baja", tone("fo_p25_7k", 7073), -12 - c7, 0.3)
+        inrange("preset 25 (forma): y baja de verdad", c7, 3, 18)
+    else: inrange(f"preset {p} (forma): baja las s", r, 1, 12)
     inrange(f"preset {p} (forma): vocales intactas en la zona", rhi, 0, 0.3)
     inrange(f"preset {p} (forma): graves intactos", rlo, 0, 0.1)
 print("\nFALLAS:", fails)
