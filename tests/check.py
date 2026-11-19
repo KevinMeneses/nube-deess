@@ -169,6 +169,9 @@ scalar("forma: cuanto 0.1 (punto fijo)", tone("fo_45_poco", 4500), -12 - forma_c
 scalar("forma: corte maximo 3", tone("fo_45_max3", 4500), -12 - forma_cut(4500, mx=3), 0.3)
 scalar("forma: Q 2", tone("fo_45_q2", 4500), -12 - forma_cut(4500, q=2), 0.3)
 scalar("forma: 3.8 kHz (las zonas siguen)", tone("fo_38", 3800), -12 - forma_cut(3800, f0=3800), 0.3)
+scalar("forma: campana en 8 kHz", tone("fo_8k", 8000), -6 - forma_cut(8000, f0=8000), 0.3)
+inrange("forma: campana en 8 kHz si baja", -6 - tone("fo_8k", 8000), 1, 20)
+scalar("forma: 8 kHz con la campana en 4.5 (no la toca)", tone("fo_8k_off", 8000), -6 - forma_cut(8000), 0.3)
 inrange("forma: 1 kHz (vocal) intacto tras 50 ms", db(np.abs(load("fo_1k") - sf.read(S / "s1k_m6.wav")[0])[SR // 20:].max()), -999, -140)
 inrange("forma: sin s (deteccion 10) intacto", db(np.abs(load("fo_sin_s") - sf.read(S / "s45_m12.wav")[0])[SR // 20:].max()), -999, -140)
 nz = sf.read(S / "noise.wav")[0][:, 0]; yn = load("fo_ruido")[:, 0]

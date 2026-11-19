@@ -19,7 +19,7 @@ slider12:0<0,1,1{Relativa (no depende del volumen),Absoluta}>-Deteccion
 slider13:0<0,3,1{Estereo,Mid/Side,Solo centro (Mid),Solo lados (Side)}>-Canales
 slider14:0<0,2,1{Normal,Solo las s (detector),Solo lo que quita}>-Escuchar
 slider15:0<0,25,1{-,Voz - suave,Voz - normal,Voz - fuerte,Voz Tonor - De-esser (Nube baja),Voz aguda / femenina,Silbido 4-6 kHz (s raras),Antes de la reverb (envio),Hi-hats / platillos,Master (suave solo centro),Voz rap rapida (s cortas),Voz con autotune (s duras),Voz grave / masculina,Coros / dobles (fuerte),Voz susurrada / ASMR,Voz hablada / podcast,Guitarra acustica (cuerdas brillantes),Platillos en el overhead (banda),Lados brillantes (solo Side),Forma de las s (Nube baja),Forma de las s - suave,Forma de las s - normal,Forma de las s - fuerte,Forma - voz aguda (s en 5-5.5 kHz),Forma - voz grave (s en 3.5-4 kHz),Por defecto}>-Cargar preset
-slider16:4500<3000,6000,1>-Forma: frecuencia de la campana (Hz)
+slider16:4500<2000,12000,1>-Forma: frecuencia de la campana (Hz)
 slider17:1<0.5,3,0.01>-Forma: Q
 slider18:6<0,20,0.1>-Forma: umbral (dB de la campana sobre 7-9 kHz)
 slider19:0.6<0,1,0.01>-Forma: cuanto corregir (0-1)
@@ -473,7 +473,7 @@ function ctl_info(id)
   id == 9 ? ( ci_s = 9; ci_a = 0; ci_b = 100; ci_l = 0; ci_d = 100; ci_p = 1; ) :
   id == 10 ? ( ci_s = 10; ci_a = -12; ci_b = 12; ci_l = 0; ci_d = 0; ci_p = 0.1; ) :
   // modo Forma de las s
-  id == 11 ? ( ci_s = 16; ci_a = 3000; ci_b = 6000; ci_l = 1; ci_d = 4500; ci_p = 1; ) :
+  id == 11 ? ( ci_s = 16; ci_a = 2000; ci_b = 12000; ci_l = 1; ci_d = 4500; ci_p = 1; ) :
   id == 12 ? ( ci_s = 17; ci_a = 0.5; ci_b = 3; ci_l = 1; ci_d = 1; ci_p = 0.01; ) :
   id == 13 ? ( ci_s = 18; ci_a = 0; ci_b = 20; ci_l = 0; ci_d = 6; ci_p = 0.1; ) :
   id == 14 ? ( ci_s = 19; ci_a = 0; ci_b = 1; ci_l = 0; ci_d = 0.6; ci_p = 0.01; ) :
@@ -519,7 +519,7 @@ function hint_for(id)
   id == 8 ? strcpy(#hint, "Lookahead: mira el audio antes y agarra el inicio de la s a tiempo. Agrega esa latencia (REAPER la compensa).") :
   id == 9 ? strcpy(#hint, "Enlace estereo: 100% = ambos lados bajan igual (la voz no se mueve). 0% = cada lado por separado.") :
   id == 10 ? strcpy(#hint, "Salida: volumen final.") :
-  id == 11 ? strcpy(#hint, "Frecuencia: centro de la campana; el detector compara esta zona con una ~1.7 veces mas arriba. 4.5 kHz = la s silbada tipica.") :
+  id == 11 ? strcpy(#hint, "Frecuencia (2-12 kHz): centro de la campana; el detector compara esta zona con una ~1.7 veces mas arriba. 4.5 kHz = la s silbada tipica.") :
   id == 12 ? strcpy(#hint, "Q: ancho de la campana. 1 = ancha y suave, 1.5-2 = solo el silbido.") :
   id == 13 ? strcpy(#hint, "Umbral: cuantos dB tiene que estar la zona de la campana sobre la de arriba (7-9 kHz) para corregir. Una s pareja da ~0 dB.") :
   id == 14 ? strcpy(#hint, "Cuanto: que parte del exceso sobre el umbral se baja. 1 = deja la s pareja, 0.5 = la mitad.") :

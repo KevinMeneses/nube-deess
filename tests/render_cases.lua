@@ -75,6 +75,8 @@ local more = {
   {"fo_45_max3",  "s45_m12.wav", with(F, {[20] = 3})},
   {"fo_45_q2",    "s45_m12.wav", with(F, {[17] = 2})},
   {"fo_38",       "s38_m12.wav", with(F, {[16] = 3800})},
+  {"fo_8k",       "s8k_m6.wav",  with(F, {[16] = 8000})},
+  {"fo_8k_off",   "s8k_m6.wav",  F},
   {"fo_1k",       "s1k_m6.wav",  F},
   {"fo_ruido",    "noise.wav",   F},
   {"fo_sin_s",    "s45_m12.wav", with(F, {[21] = 10})},

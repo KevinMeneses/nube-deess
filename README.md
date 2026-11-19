@@ -35,7 +35,7 @@ De-esser para REAPER (JSFX, macOS/Windows/Linux), hermano de [Nube EQ](https://g
   - **Ancha**: baja la señal entera en cada s.
   - **Forma** (nuevo en 1.2): baja una campana dinámica en 4–5 kHz **solo en las s silbadas/angostas** (las que
     tienen casi toda la energía abajo y poco sobre 6 kHz); las s parejas y las vocales no se tocan. Es el
-    `claude_s_shaper` de Nube baja, idéntico muestra a muestra. Parámetros propios: frecuencia de la campana, Q,
+    `claude_s_shaper` de Nube baja, idéntico muestra a muestra. Parámetros propios: frecuencia de la campana (2–12 kHz; el original llegaba de 3 a 6 kHz), Q,
     umbral (dB de la zona de la campana sobre la de ~7.7 kHz), cuánto corregir, corte máximo y detección de s
     (dB de agudos sobre 2 kHz). Funciona con lookahead, Mid/Side, solo centro/lados, escuchar s (la campana) y
     escuchar cambios.
