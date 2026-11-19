@@ -6,7 +6,7 @@ A free de-esser for [REAPER](https://www.reaper.fm), written as a JSFX (macOS / 
 
 ![Nube De-Ess](docs/captura.png)
 
-Relative detection (ignores the noise floor between words) or absolute, split-band / band / wideband modes with phase-aligned crossovers, range, ratio, lookahead, M/S, listen to the esses or to what is removed, live spectrum and 19 presets. ~1.9 % CPU.
+Relative detection (ignores the noise floor between words) or absolute, split-band / band / wideband modes with phase-aligned crossovers, a "sibilant shape" mode that only tames narrow, whistly esses (dynamic bell at 4–5 kHz), range, ratio, lookahead, M/S, listen to the esses or to what is removed, live spectrum and 26 presets. ~1.9 % CPU.
 
 **Install** — with [ReaPack](https://reapack.com): *Extensions → ReaPack → Import repositories*, paste
 `https://github.com/KevinMeneses/nube-plugins/raw/main/index.xml`, then install **Nube De-Ess**. Or copy `nube_deess.jsfx`
@@ -33,6 +33,12 @@ De-esser para REAPER (JSFX, macOS/Windows/Linux), hermano de [Nube EQ](https://g
   - **Partida**: baja todo lo que está sobre *Desde* cuando aparece una s (el clásico).
   - **Banda**: baja solo entre *Desde* y *Hasta* (s con silbido angosto; el aire de arriba queda intacto).
   - **Ancha**: baja la señal entera en cada s.
+  - **Forma** (nuevo en 1.2): baja una campana dinámica en 4–5 kHz **solo en las s silbadas/angostas** (las que
+    tienen casi toda la energía abajo y poco sobre 6 kHz); las s parejas y las vocales no se tocan. Es el
+    `claude_s_shaper` de Nube baja, idéntico muestra a muestra. Parámetros propios: frecuencia de la campana (2–12 kHz; el original llegaba de 3 a 6 kHz), Q,
+    umbral (dB de la zona de la campana sobre la de ~7.7 kHz), cuánto corregir, corte máximo y detección de s
+    (dB de agudos sobre 2 kHz). Funciona con lookahead, Mid/Side, solo centro/lados, escuchar s (la campana) y
+    escuchar cambios.
 - Filtros Linkwitz-Riley de 4º orden con la fase alineada: sin reducción, la respuesta es **plana ±0.00 dB** en los
   tres modos.
 - Umbral, **rango** (máximo que baja), ratio, ataque, release, **lookahead** hasta 5 ms (REAPER compensa la latencia),
@@ -79,16 +85,38 @@ Para ajustar: pon **Escuchar s** y mueve *Desde* hasta que se oigan las s y casi
 | Antes de la reverb (envío) | Partida 4 kHz, −14 dB, rango 14, 8:1 (s que no salpiquen la reverb) |
 | Hi-hats / platillos | Banda 6–12 kHz, absoluta −24 dB, rango 6 |
 | Master (suave, solo centro) | Solo Mid, −6 dB, rango 3, 2:1, lookahead 2 ms |
-| Por defecto | |
+| Voz rap rápida, autotune, grave, coros, susurrada, podcast, guitarra, overhead, lados | (ver el menú) |
+| Forma de las s (Nube baja) | Los valores de `claude_s_shaper` de la mezcla: 4.5 kHz, Q 1.5, umbral 2, cuánto 0.6, máx 6, detección −3 |
+| Forma de las s - suave | 4.5 kHz, umbral 6, cuánto 0.3, máx 4, detección −6 |
+| Forma de las s - normal | = `claude_s_shaper` por defecto (4.5 kHz, Q 1, umbral 6, 0.6, máx 8, −12) |
+| Forma de las s - fuerte | 4.5 kHz, Q 1.2, umbral 3, cuánto 1, máx 12, −8 |
+| Forma - voz aguda | 5.2 kHz, Q 1.2, umbral 4, máx 8 |
+| Forma - voz grave | 3.8 kHz, umbral 5, máx 8, detección −3 (más estricta: a 3.8 kHz las vocales contarían como s) |
+| Forma - s agudas 7 kHz (Nube baja) | El segundo Forma de la mezcla: 7073 Hz, Q 2.81, umbral 7, cuánto 0.55, máx 18, detección +3.4. Atrapó las pocas s silbadas en ~7 kHz que nada más agarraba |
+| Por defecto | (pasó del 19 al 26; los presets 1–18 tienen el mismo número y suenan igual que en la 1.1) |
+
+Sobre el modo Forma: en el `claude_s_shaper` original, `a0` de la campana y `A0` del detector de 4.5 kHz son la
+misma variable (EEL no distingue mayúsculas). Mientras corta, el detector queda ~20 dB más sensible hasta el bloque
+siguiente, así que una s silbada baja casi hasta el **corte máximo** (y *Cuánto* solo importa con valores bajos).
+Así sonó en Nube baja y así se reproduce, a propósito y probado muestra a muestra.
 
 ## Pruebas
 
-- `tests/run.sh`: renderiza 38 casos en una pestaña temporal de REAPER y los compara con la teoría (45 chequeos):
+- `tests/run.sh` (1.2): además compara muestra a muestra el modo Forma con `claude_s_shaper` (por defecto, con los
+  ajustes de Nube baja y con un seno de 4.5 kHz: −300 dB de diferencia, bit a bit), los 19 presets y dos ajustes de
+  proyecto de la 1.1.0 (`tests/ref/`) con la 1.2.0 (bit a bit), la curva del modo Forma contra la teoría (filtros RBJ
+  y punto fijo del detector, ±0.3 dB), y mide `claude_deesser_lr` contra sus equivalentes en Nube. El script enlaza
+  el `.jsfx` de esta copia en `Effects/Nube De-Ess Test/` mientras corre y lo borra al final.
+- Versión 1.1: renderiza 38 casos en una pestaña temporal de REAPER y los compara con la teoría (45 chequeos):
   respuesta plana sin reducción en los 3 modos, curva relativa y absoluta (±0.2 dB contra la fórmula del LR4 con la
   deformación bilineal), independencia del nivel, modo Banda (lo de arriba no se toca), Ancha, escuchar s / cambios,
   solo Mid / Side, enlace, ataque y release, lookahead (y latencia compensada), y con la voz seca: s −7.7 dB de
   mediana, vocales 0.00 dB, igual a −20 dB, y los 19 presets.
-- `tests/ui_test.py` (+ `ui.py`, `ui_dump.lua`, `scroll.swift`, `reopen.sh`): 15 pruebas de la interfaz con el mouse
+- `tests/ui_test.py` (+ `ui.py`, `ui_dump.lua`, `scroll.swift`, `reopen.sh`): 28 pruebas de la interfaz con el mouse
+  (13 del modo Forma: botón, perillas propias, doble clic, línea de la campana, rueda, historial y menú de presets).
+  `reopen.sh` usa el `.jsfx` de esta copia del repo. Con los clics sintéticos de `cliclick` REAPER a veces no le
+  entrega al JSFX el último "soltar" (`mouse_cap` queda en 1); `ui.py` manda un soltar extra tras cada doble clic y
+  cada arrastre
   (`cliclick`). `tests/reopen.sh` abre la demo con la voz; `tests/ui_close.lua` la cierra.
 - `tests/perf.lua`: CPU.
 

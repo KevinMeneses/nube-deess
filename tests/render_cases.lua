@@ -2,7 +2,15 @@
 -- Uso: REAPER -nonewinst tests/render_cases.lua   (escribe tests/out/*.wav y tests/out/log.txt)
 local ROOT = debug.getinfo(1, "S").source:match("^@(.*)/[^/]*$")
 local OUT = ROOT .. "/out"
-local FX = "JS:Nube De-Ess/nube_deess.jsfx"
+-- se prueba el .jsfx de ESTA copia del repo (y la 1.1.0 de referencia), enlazados en Effects/Nube De-Ess Test
+local REPO = ROOT:match("^(.*)/[^/]*$")
+local EFF = reaper.GetResourcePath() .. "/Effects/Nube De-Ess Test"
+os.execute('mkdir -p "' .. EFF .. '" && ln -sf "' .. REPO .. '/nube_deess.jsfx" "' .. EFF .. '/nube_deess.jsfx"'
+  .. ' && ln -sf "' .. ROOT .. '/ref/nube_deess_1.1.0.jsfx" "' .. EFF .. '/nube_deess_1.1.0.jsfx"')
+local FX = "JS:Nube De-Ess Test/nube_deess.jsfx"
+local REF = "JS:Nube De-Ess Test/nube_deess_1.1.0.jsfx"      -- version 1.1.0: los presets viejos deben sonar igual
+local SHAPER = "JS:Claude/claude_s_shaper.jsfx"               -- el original del modo Forma (sliders lineales)
+local DLR = "JS:Claude/claude_deesser_lr.jsfx"                -- el de-esser relativo que reemplazo Nube De-Ess
 local PRESET = 15
 os.execute('mkdir -p "' .. OUT .. '"')
 local logf = io.open(OUT .. "/log.txt", "w")
@@ -50,7 +58,52 @@ local CASES = {
   {"voz_m20",       "voz.wav",     {[15] = 2}, 2, -20},
   {"voz_m20_seca",  "voz.wav",     {[2] = 0}, 2, -20},
 }
-for p = 1, 19 do CASES[#CASES + 1] = {"preset" .. p, "voz.wav", {[PRESET] = p}} end
+-- modo Forma de las s (slider 11 = 3)
+local F = {[11] = 3}
+local BAJA = {4500, 1.5, 2, 0.6, 6, -3}                       -- claude_s_shaper en la mezcla de Nube baja
+local more = {
+  -- igual al original claude_s_shaper
+  {"eq_shaper_ref",     "voz.wav",     {}, 2, 0, SHAPER},
+  {"eq_shaper_nd",      "voz.wav",     F},
+  {"eq_shaperbaja_ref", "voz.wav",     BAJA, 2, 0, SHAPER},
+  {"eq_shaperbaja_nd",  "voz.wav",     {[PRESET] = 19}},
+  {"eq_shaper45_ref",   "s45_m12.wav", {}, 2, 0, SHAPER},
+  {"eq_shaper45_nd",    "s45_m12.wav", F},
+  -- comportamiento
+  {"fo_45",       "s45_m12.wav", F},
+  {"fo_45_poco",  "s45_m12.wav", with(F, {[19] = 0.1})},
+  {"fo_45_max3",  "s45_m12.wav", with(F, {[20] = 3})},
+  {"fo_45_q2",    "s45_m12.wav", with(F, {[17] = 2})},
+  {"fo_38",       "s38_m12.wav", with(F, {[16] = 3800})},
+  {"fo_8k",       "s8k_m6.wav",  with(F, {[16] = 8000})},
+  {"fo_p25_7k",   "s7k_m12.wav", {[PRESET] = 25}},
+  {"fo_8k_off",   "s8k_m6.wav",  F},
+  {"fo_1k",       "s1k_m6.wav",  F},
+  {"fo_ruido",    "noise.wav",   F},
+  {"fo_sin_s",    "s45_m12.wav", with(F, {[21] = 10})},
+  {"fo_solo_mid", "s45_m12.wav", with(F, {[13] = 2})},
+  {"fo_solo_side","s45_m12.wav", with(F, {[13] = 3})},
+  {"fo_lr",       "s45_lr.wav",  F},
+  {"fo_ms",       "s45_lr.wav",  with(F, {[13] = 1})},
+  {"fo_escuchar", "s45_m12.wav", with(F, {[14] = 1})},
+  {"fo_delta",    "s45_m12.wav", with(F, {[14] = 2})},
+  {"fo_salida",   "s45_m12.wav", with(F, {[10] = 6})},
+  {"fo_la_off",   "burst45.wav", F},
+  {"fo_la_2",     "burst45.wav", with(F, {[8] = 2})},
+  {"fo_voz_m20",  "voz.wav",     {[PRESET] = 19}, 2, -20},
+  -- comparacion con claude_deesser_lr (informativa): los dos ajustes de la mezcla
+  {"lr_ref",      "voz.wav", {5500, -10, 4, 10, 0, 0, 9999}, 2, 0, DLR},
+  {"lr_nd",       "voz.wav", {[PRESET] = 4}},  {"lr_suave_ref","voz.wav", {4000, -6, 3, 6, 0, 0, 9999}, 2, 0, DLR},
+  {"lr_suave_nd", "voz.wav", {[1] = -6, [2] = 6, [3] = 3, [4] = 4000, [6] = 0.5, [7] = 40}},
+  -- ajustes guardados en el proyecto de Nube baja (v1.1.0 vs 1.2.0)
+  {"old_proj_ref", "voz.wav", {[1] = -26, [2] = 30, [3] = 3.99, [4] = 5500, [6] = 3, [7] = 60, [12] = 1}, 2, 0, REF},
+  {"old_proj_nd",  "voz.wav", {[1] = -26, [2] = 30, [3] = 3.99, [4] = 5500, [6] = 3, [7] = 60, [12] = 1}},
+  {"old_msla_ref", "voz.wav", {[11] = 1, [5] = 10000, [13] = 1, [8] = 2, [9] = 50}, 2, 0, REF},
+  {"old_msla_nd",  "voz.wav", {[11] = 1, [5] = 10000, [13] = 1, [8] = 2, [9] = 50}},
+}
+for _, c in ipairs(more) do CASES[#CASES + 1] = c end
+for p = 1, 26 do CASES[#CASES + 1] = {"preset" .. p, "voz.wav", {[PRESET] = p}} end
+for p = 1, 19 do CASES[#CASES + 1] = {"ref_preset" .. p, "voz.wav", {[PRESET] = p}, 2, 0, REF} end
 
 reaper.Main_OnCommand(40859, 0) -- nueva pestaña
 reaper.GetSetProjectInfo(0, "PROJECT_SRATE", 48000, true)
@@ -72,9 +125,11 @@ for _, c in ipairs(CASES) do
     reaper.SetMediaItemInfo_Value(item, "D_FADEINLEN", 0); reaper.SetMediaItemInfo_Value(item, "D_FADEOUTLEN", 0)
     reaper.UpdateItemInProject(item)
     while reaper.TrackFX_GetCount(tr) > 0 do reaper.TrackFX_Delete(tr, 0) end
-    local fx = reaper.TrackFX_AddByName(tr, FX, false, -1)
-    if fx < 0 then log("ERROR no cargó el FX") break end
+    local fxname = c[6] or FX
+    local fx = reaper.TrackFX_AddByName(tr, fxname, false, -1)
+    if fx < 0 then log("ERROR no cargó el FX", fxname) break end
     if params[PRESET] then reaper.TrackFX_SetParam(tr, fx, PRESET - 1, params[PRESET]) end
+    if fxname == SHAPER or fxname == DLR then for s_, v in pairs(params) do reaper.TrackFX_SetParam(tr, fx, s_ - 1, v) end params = {} end
     for s_, v in pairs(params) do
       if s_ ~= PRESET then
         if LOGP[s_] then reaper.TrackFX_SetParamNormalized(tr, fx, s_ - 1, to_norm(s_, v))
@@ -92,12 +147,13 @@ for _, c in ipairs(CASES) do
     reaper.GetSetProjectInfo_String(0, "RENDER_PATTERN", name, true)
     reaper.Main_OnCommand(42230, 0)
     local vals = {}
-    for k = 1, 14 do local _, v = reaper.TrackFX_GetFormattedParamValue(tr, fx, k - 1, ""); vals[#vals + 1] = v end
+    for k = 1, (fxname == FX and 21 or 14) do local _, v = reaper.TrackFX_GetFormattedParamValue(tr, fx, k - 1, ""); vals[#vals + 1] = v end
     log("caso", name, table.concat(vals, " | "))
   end
 end
 reaper.Main_SaveProjectEx(0, OUT .. "/_tmp_test.rpp", 0)
 reaper.Main_openProject("noprompt:" .. OUT .. "/_tmp_test.rpp")
 reaper.Main_OnCommand(40860, 0) -- cerrar pestaña
+os.remove(EFF .. "/nube_deess.jsfx"); os.remove(EFF .. "/nube_deess_1.1.0.jsfx"); os.remove(EFF)
 log("done")
 logf:close()

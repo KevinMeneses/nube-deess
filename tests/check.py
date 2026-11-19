@@ -114,10 +114,102 @@ inrange("voz: vocales intactas (graves)", rv_lo, 0, 0.1)
 inrange("voz: vocales casi intactas (agudos)", rv_hi, 0, 1.0)
 n2, rs2, _, _ = voz_stats("voz_m20", "voz_m20_seca")
 scalar("voz -20 dB: las s bajan igual", rs2, rs, 1.0)
-for p in range(1, 20):
+for p in range(1, 19):
     zona = {6: [4000, 6000], 14: [5000, 10000], 16: [3000, 8000]}.get(p)   # presets de banda: se mide en su zona
     _, r, rlo, _ = voz_stats(f"preset{p}", "voz_seca", sg.butter(4, zona, "band", fs=SR, output="sos") if zona else HI)
     if p in (8, 17, 18): inrange(f"preset {p} (no es para voz): no rompe la voz", rlo, 0, 0.5)
     else: inrange(f"preset {p}: baja las s", r, 1, 18)
+
+print("== presets y ajustes de la 1.1.0 suenan igual en la 1.2.0")
+def null(a, b): return db(np.abs(load(a) - load(b)).max())
+for p in range(1, 20):
+    q = 26 if p == 19 else p                       # "Por defecto" paso del 19 al 26
+    inrange(f"preset {p} = 1.1.0 (dB de diferencia)", null(f"preset{q}", f"ref_preset{p}"), -999, -140)
+inrange("ajustes de Nube baja = 1.1.0", null("old_proj_nd", "old_proj_ref"), -999, -140)
+inrange("banda + M/S + lookahead = 1.1.0", null("old_msla_nd", "old_msla_ref"), -999, -140)
+
+print("== comparado con claude_deesser_lr (el relativo original)")
+for c in ("lr", "lr_suave"):
+    _, ro, vo, _ = voz_stats(f"{c}_ref", "voz_seca"); _, rn, vn, _ = voz_stats(f"{c}_nd", "voz_seca")
+    print(f"    {c}: s bajan {ro:.1f} dB (original) / {rn:.1f} dB (Nube); vocales {vo:.2f} / {vn:.2f} dB")
+    # diferencia conocida: el original detecta con envolvente de pico (0.5 / 40 ms), Nube con RMS de 1.5 ms
+    inrange(f"{c}: diferencia con el original (dB)", rn - ro, -3.5, 1)
+    inrange(f"{c}: vocales intactas en Nube", vn, 0, 0.05)
+
+print("== modo Forma de las s")
+for c, src in (("shaper", "voz"), ("shaperbaja", "voz"), ("shaper45", "s45_m12")):
+    inrange(f"{c}: Nube De-Ess = claude_s_shaper (dB)", null(f"eq_{c}_nd", f"eq_{c}_ref"), -999, -120)
+    x = sf.read(S / f"{src}.wav")[0]
+    inrange(f"{c}: el original si cambia el audio (dB)", db(np.abs(load(f"eq_{c}_ref") - x).max()), -60, 20)
+from scipy.signal import freqz
+def rbj_bp(f, q):
+    w = 2 * np.pi * f / SR; al = np.sin(w) / (2 * q); a0 = 1 + al
+    return [al / a0, 0, -al / a0], [1, -2 * np.cos(w) / a0, (1 - al) / a0]
+def rbj_hp(f):
+    w = 2 * np.pi * f / SR; c = np.cos(w); al = np.sin(w) / (2 * 0.70710678); a0 = 1 + al
+    return [(1 + c) / 2 / a0, -(1 + c) / a0, (1 + c) / 2 / a0], [1, -2 * c / a0, (1 - al) / a0]
+def mag(ba, f): return np.abs(freqz(*ba, worN=[f], fs=SR)[1][0])
+def forma_cut(f, f0=4500, q=1, thr=6, amt=0.6, mx=8, det=-12):
+    """dB que baja un seno de frecuencia f = f0 (centro de la campana) en estado estable. Como en el original,
+    mientras corta el detector de la campana usa b0 = a0 de la campana: se busca el punto fijo."""
+    r = f0 / 4500
+    is_s = db(mag(rbj_hp(4000 * r), f) / mag(rbj_bp(2000, 0.7), f)) > det
+    tilt = db(mag(rbj_bp(4500 * r, 1.4), f) / mag(rbj_bp(7700 * r, 1.6), f))
+    if not (is_s and tilt > thr): return 0
+    w = 2 * np.pi * 4500 * r / SR; b0 = np.sin(w) / 2.8 / (1 + np.sin(w) / 2.8); alq = np.sin(2 * np.pi * f0 / SR) / (2 * q)
+    c = min(mx, (tilt - thr) * amt)
+    for _ in range(200):
+        a0 = 1 + alq / 10 ** (-c / 40)
+        c = min(mx, (tilt + db(a0 / b0) - thr) * amt)
+    return c
+c45 = forma_cut(4500)
+print(f"    4.5 kHz: teoria baja {c45:.2f} dB")
+scalar("forma: 4.5 kHz baja (defecto)", tone("fo_45", 4500), -12 - c45, 0.3)
+scalar("forma: cuanto 0.1 (punto fijo)", tone("fo_45_poco", 4500), -12 - forma_cut(4500, amt=0.1), 0.3)
+scalar("forma: corte maximo 3", tone("fo_45_max3", 4500), -12 - forma_cut(4500, mx=3), 0.3)
+scalar("forma: Q 2", tone("fo_45_q2", 4500), -12 - forma_cut(4500, q=2), 0.3)
+scalar("forma: 3.8 kHz (las zonas siguen)", tone("fo_38", 3800), -12 - forma_cut(3800, f0=3800), 0.3)
+scalar("forma: campana en 8 kHz", tone("fo_8k", 8000), -6 - forma_cut(8000, f0=8000), 0.3)
+inrange("forma: campana en 8 kHz si baja", -6 - tone("fo_8k", 8000), 1, 20)
+scalar("forma: 8 kHz con la campana en 4.5 (no la toca)", tone("fo_8k_off", 8000), -6 - forma_cut(8000), 0.3)
+inrange("forma: 1 kHz (vocal) intacto tras 50 ms", db(np.abs(load("fo_1k") - sf.read(S / "s1k_m6.wav")[0])[SR // 20:].max()), -999, -140)
+inrange("forma: sin s (deteccion 10) intacto", db(np.abs(load("fo_sin_s") - sf.read(S / "s45_m12.wav")[0])[SR // 20:].max()), -999, -140)
+nz = sf.read(S / "noise.wav")[0][:, 0]; yn = load("fo_ruido")[:, 0]
+dn = db(np.sqrt(np.mean((yn - nz) ** 2)) / np.sqrt(np.mean(nz ** 2)))
+inrange("forma: s pareja (ruido) casi intacta (dB)", dn, -999, -30)
+scalar("forma: solo centro baja", tone("fo_solo_mid", 4500), -12 - c45, 0.3)
+inrange("forma: solo lados intacto (mono)", db(np.abs(load("fo_solo_side") - sf.read(S / "s45_m12.wav")[0])[SR // 20:].max()), -999, -140)
+scalar("forma: L/R distintos, L", tone("fo_lr", 4500, ch=0), -12 - c45, 0.3)
+scalar("forma: L/R distintos, R", tone("fo_lr", 4500, ch=1), -30 - c45, 0.3)
+scalar("forma: M/S = estereo (R)", tone("fo_ms", 4500, ch=1), tone("fo_lr", 4500, ch=1), 0.01)
+scalar("forma: escuchar s (campana)", tone("fo_escuchar", 4500), -12, 0.05)
+scalar("forma: escuchar cambios", tone("fo_delta", 4500), -12 + db(1 - a(-c45)), 0.3)
+scalar("forma: salida +6", tone("fo_salida", 4500), -6 - c45, 0.3)
+for name in ("fo_la_off", "fo_la_2"):
+    x = load(name)[:, 0]; on = np.argmax(np.abs(x) > 1e-4)
+    print(f"    {name}: arranca en la muestra {on} (debe ser ~48000)")
+    if abs(on - 48000) > 3: fails += 1; print("MAL", name, "desalineado: la latencia no se compenso")
+p0 = db(np.abs(load("fo_la_off")[48000:48096, 0]).max()); p2 = db(np.abs(load("fo_la_2")[48000:48096, 0]).max())
+print(f"    pico de los 2 primeros ms: sin lookahead {p0:.1f}, con 2 ms {p2:.1f}")
+inrange("forma: lookahead agarra el inicio (dB menos)", p0 - p2, 0.5, 20)
+HS = sg.butter(4, [4000, 5500], "band", fs=SR, output="sos")
+n, rs, rv_lo, rv_hi = voz_stats("eq_shaperbaja_nd", "voz_seca", HS)
+print(f"    voz (Forma Nube baja): {n} cuadros de s, 4-5.5 kHz bajan {rs:.2f} dB; vocales {rv_lo:.2f} / {rv_hi:.2f} dB")
+inrange("forma voz: las s bajan en 4-5.5 kHz", rs, 0.3, 8)
+inrange("forma voz: vocales intactas (graves)", rv_lo, 0, 0.05)
+_, rs2, _, _ = voz_stats("fo_voz_m20", "voz_m20_seca", HS)
+scalar("forma voz -20 dB: bajan igual", rs2, rs, 0.5)
+for p in range(19, 26):
+    zona = {24: [3200, 4500], 25: [6000, 8500]}.get(p, [4000, 5500])   # se mide en la zona de cada campana
+    _, r, rlo, rhi = voz_stats(f"preset{p}", "voz_seca", sg.butter(4, zona, "band", fs=SR, output="sos"))
+    print(f"    preset {p}: en la zona, s {r:.2f} dB / vocales {rhi:.2f} dB")
+    if p == 25:   # solo para pocas s muy silbadas en ~7 kHz (la voz de prueba no las tiene): se prueba con un seno
+        c7 = forma_cut(7073, f0=7073, q=2.81, thr=7, amt=0.55, mx=18, det=3.4)
+        print(f"    preset 25: teoria baja {c7:.2f} dB un seno de 7 kHz")
+        scalar("preset 25 (forma): s silbada en 7 kHz baja", tone("fo_p25_7k", 7073), -12 - c7, 0.3)
+        inrange("preset 25 (forma): y baja de verdad", c7, 3, 18)
+    else: inrange(f"preset {p} (forma): baja las s", r, 1, 12)
+    inrange(f"preset {p} (forma): vocales intactas en la zona", rhi, 0, 0.3)
+    inrange(f"preset {p} (forma): graves intactos", rlo, 0, 0.1)
 print("\nFALLAS:", fails)
 sys.exit(1 if fails else 0)
